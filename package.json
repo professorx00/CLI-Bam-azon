@@ -1,0 +1,24 @@
+{
+  "name": "cli-bam-azon",
+  "version": "1.0.0",
+  "description": "Command Line Amazon Clonee",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/professorx00/CLI-Bam-azon.git"
+  },
+  "author": "Dave Ward",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/professorx00/CLI-Bam-azon/issues"
+  },
+  "homepage": "https://github.com/professorx00/CLI-Bam-azon#readme",
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "inquirer": "^7.0.0",
+    "mysql": "^2.17.1"
+  }
+}
