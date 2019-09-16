@@ -70,7 +70,39 @@ function addInventory(){
 }
 
 function addNewProduct(){
-
+    inquirer.prompt([
+        {
+            name:"product",
+            message:"What is the new Item",
+            type:"input"
+        },
+        {
+            name:"department",
+            message:"What department is the new Item?",
+            type:"input"
+        },
+        {
+            name:"price",
+            message:"How much will it cost?",
+            type:"number"
+        },
+        {
+            name:"amount",
+            message:"How many do we have in inventory?",
+            type:"number"
+        }
+    ]).then((answers)=>{
+        let product = answers.product;
+        let dept = answers.department;
+        let price = answers.price;
+        let amount = answers.amount;
+        let queryInfo = [product,dept,price,amount]
+        database.query("insert into products(product_name,department_name,price,stock_quantity) values(?,?,?,?)",queryInfo,(err,res)=>{
+            if(err) throw err;
+            if(res){console.log(`${product} has been added into the database`)}
+        });
+        setTimeout(()=>{askManager()},1000);
+    });
 }
 
 function askManager(){
