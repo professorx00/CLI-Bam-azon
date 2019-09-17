@@ -4,8 +4,8 @@ const inquirer = require('inquirer');
 
 // instantiate
 const table = new Table({
-    head: ['Product ID', 'Product Name', 'Department', 'Price', 'In Stock']
-    , colWidths: [20, 20, 20, 20, 20]
+    head: ['Product ID', 'Product Name', 'Price', 'In Stock','Department Number']
+    , colWidths: [20, 60, 20, 20, 20]
 });
 
 var database = mysql.createConnection({
@@ -15,24 +15,35 @@ var database = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
+var logoCli = require('cli-logo'),
+    version = 'v' + require('./package.json').version,
+    description = require('./package.json').description;
+    logoConfig = {
+        "name": "BAMAZON",
+        "description": description,
+        "version": version
+    };
+ 
+logoCli.print(logoConfig);
+
 database.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + database.threadId);
-    start();
+    createTable();
 });
 
 function printTable() { console.log(table.toString()); }
 
 function lowInventory(){
     const lowInventoryTable = new Table({
-        head: ['Product ID', 'Product Name', 'Department', 'Price', 'In Stock']
+        head: ['Product ID', 'Product Name', 'Price', 'In Stock','Department Number']
         , colWidths: [20, 20, 20, 20, 20]
     });
     database.query("select * from products where stock_quantity<=10", (err, res) => {
         if (err) throw err;
         res.forEach(element => {
             let temp = []
-            temp.push(element.item_id, element.product_name, element.department_name, element.price, element.stock_quantity);
+            temp.push(element.item_id, element.product_name, element.price, element.stock_quantity,element.dept_ID);
             lowInventoryTable.push(temp)
         });
         console.log(lowInventoryTable.toString());
@@ -78,30 +89,60 @@ function addNewProduct(){
         },
         {
             name:"department",
-            message:"What department is the new Item?",
-            type:"input"
+            message:"What department number does the new item belong too?",
+            type:"number",
+            validate:function(value){
+                if(isNaN(value)){
+                    return false
+                }
+                else{
+                    return true
+                }
+            }
         },
         {
             name:"price",
             message:"How much will it cost?",
-            type:"number"
+            type:"number",
+            validate:function(value){
+                if(isNaN(value)){
+                    return false
+                }
+                else{
+                    return true
+                }
+            }
         },
         {
             name:"amount",
             message:"How many do we have in inventory?",
-            type:"number"
+            type:"number",
+            validate:function(value){
+                if(isNaN(value)){
+                    return false
+                }
+                else{
+                    return true
+                }
+            }
         }
     ]).then((answers)=>{
         let product = answers.product;
         let dept = answers.department;
         let price = answers.price;
         let amount = answers.amount;
-        let queryInfo = [product,dept,price,amount]
-        database.query("insert into products(product_name,department_name,price,stock_quantity) values(?,?,?,?)",queryInfo,(err,res)=>{
+        let queryInfo = [product,price,amount,dept]
+        
+        database.query("insert into products(product_name,price,stock_quantity,dept_id) values(?,?,?,?)",queryInfo,(err,res)=>{
             if(err) throw err;
             if(res){console.log(`${product} has been added into the database`)}
-        });
-        setTimeout(()=>{askManager()},1000);
+            database.query("select item_id from products where product_name=?",[product],function(err,res){
+                if(err) throw err;
+                queryInfo.splice(0,0,res[0].item_id);
+                table.push(queryInfo);
+                setTimeout(()=>{askManager()},1000);
+            })
+        }); 
     });
 }
 
@@ -112,7 +153,7 @@ function askManager(){
             name:"selection",
             message:"Please choose which option you need",
             type: "list",
-            choices:["View Products for Sale","View Low Inventory","Add to Inventory","Add New Product"]
+            choices:["View Products for Sale","View Low Inventory","Add to Inventory","Add New Product","Exit"]
         }
     ]).then((answer)=>{
         let choice = answer.selection
@@ -130,6 +171,8 @@ function askManager(){
             case "Add New Product":
                 addNewProduct();
                 break;
+            case "Exit":
+                process.exit();
             default:
                 console.log("Something went wrong. Please try again")
                 askManager();
@@ -143,15 +186,10 @@ function createTable() {
         if (err) throw err;
         res.forEach(element => {
             let temp = []
-            temp.push(element.item_id, element.product_name, element.department_name, element.price, element.stock_quantity);
+            temp.push(element.item_id, element.product_name, element.price, element.stock_quantity,element.dept_ID);
             table.push(temp)
         });
         printTable();
         askManager()
     })
-}
-
-function start() {
-    createTable()
-    
 }
