@@ -2,12 +2,12 @@ const Table = require('cli-table');
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 
-// instantiate
+// instantiate table
 const table = new Table({
     head: ['Product ID', 'Product Name','Price', 'In Stock','Department Number']
     , colWidths: [20, 40, 20, 20, 20]
 });
-
+//Initiate Database
 var database = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -15,6 +15,7 @@ var database = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
+//Creates and Displays Logo
 var logoCli = require('cli-logo'),
     version = 'v' + require('./package.json').version,
     description = require('./package.json').description;
@@ -25,15 +26,15 @@ var logoCli = require('cli-logo'),
     };
  
 logoCli.print(logoConfig);
-
+//Connects to database
 database.connect(function (err) {
     if (err) throw err;
-    start();
+    createTable();
 });
-// table.push([14,"Test Product","Test Department",14.99,45])
 
+//prints Table
 function printTable() { console.log(table.toString()); }
-
+//creates Table 
 function createTable() {
     database.query("select * from products", (err, res) => {
         if (err) throw err;
@@ -46,7 +47,7 @@ function createTable() {
     })
 }
 
-
+//Starts and ask the first question
 function askCustomer() {
     printTable();
     inquirer.prompt([{
@@ -98,8 +99,4 @@ function askCustomer() {
         })
 
     })
-}
-
-function start() {
-    createTable()
 }

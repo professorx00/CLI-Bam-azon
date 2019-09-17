@@ -2,12 +2,12 @@ const Table = require('cli-table');
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 
-// instantiate
+// instantiate table
 const table = new Table({
     head: ['Product ID', 'Product Name', 'Price', 'In Stock','Department Number']
     , colWidths: [20, 60, 20, 20, 20]
 });
-
+//intialize Database
 var database = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -15,6 +15,7 @@ var database = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
+//create and show Logo
 var logoCli = require('cli-logo'),
     version = 'v' + require('./package.json').version,
     description = require('./package.json').description;
@@ -25,19 +26,19 @@ var logoCli = require('cli-logo'),
     };
  
 logoCli.print(logoConfig);
-
+//connect to Database and Start the program
 database.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + database.threadId);
     createTable();
 });
-
+//display Table
 function printTable() { console.log(table.toString()); }
-
+//Display Low Inventory of less then 10
 function lowInventory(){
     const lowInventoryTable = new Table({
         head: ['Product ID', 'Product Name', 'Price', 'In Stock','Department Number']
-        , colWidths: [20, 20, 20, 20, 20]
+        , colWidths: [20, 60, 20, 20, 20]
     });
     database.query("select * from products where stock_quantity<=10", (err, res) => {
         if (err) throw err;
@@ -50,7 +51,7 @@ function lowInventory(){
         askManager();
     })
 }
-
+//Allows user to add to inventory
 function addInventory(){
     inquirer.prompt([
         {
@@ -79,7 +80,7 @@ function addInventory(){
         
     })
 }
-
+//Allows user to add New Product
 function addNewProduct(){
     inquirer.prompt([
         {
@@ -145,7 +146,7 @@ function addNewProduct(){
         }); 
     });
 }
-
+//Ask User what they want to do
 function askManager(){
     
     inquirer.prompt([
@@ -180,7 +181,7 @@ function askManager(){
         }
     });
 }
-
+//Starts the system
 function createTable() {
     database.query("select * from products", (err, res) => {
         if (err) throw err;

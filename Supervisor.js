@@ -1,7 +1,7 @@
 const Table = require('cli-table');
 const mysql = require('mysql');
 const inquirer = require('inquirer');
-
+//initalize Database
 var database = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -9,6 +9,8 @@ var database = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
+
+//initalize and display logo
 var logoCli = require('cli-logo'),
     version = 'v' + require('./package.json').version,
     description = require('./package.json').description;
@@ -19,14 +21,15 @@ var logoCli = require('cli-logo'),
     };
  
 logoCli.print(logoConfig);
-
+//Connects and starts Application
 database.connect(function (err) {
     if (err) throw err;
     start();
 });
-
+//initalize the table
 let table = new Table({head: ['Department ID', 'Department Name', 'Over Head Cost', 'Product Sales', 'Profit'], colWidths: [20, 20, 20, 20, 20]});
 
+//Displays Sales Data
 function salesData() {
     totalSales=[]
     database.query("select department.dept_id,department.dept_name,department.over_head,case when isNull(sum(products.product_sales)) then 0 else sum(products.product_sales) end as sales from department left join products on department.dept_id = products.dept_ID group by department.dept_id",function(err,res){
@@ -41,7 +44,7 @@ function salesData() {
     })
 }
 
-
+//Adds a Department
 function addDepartment() {
     inquirer.prompt([
         {
@@ -82,7 +85,7 @@ function addDepartment() {
 };
 
 
-
+//Starts program
 function start() {
     inquirer.prompt([
         {
